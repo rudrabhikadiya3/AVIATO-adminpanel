@@ -13,13 +13,10 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import * as yup from 'yup';
 import { Form, Formik, useFormik } from 'formik';
 
-import { red } from '@mui/material/colors';
-
-const color = red[500];
-
 
 export default function FormDialog() {
   const [open, setOpen] = useState(false);
+  const [data, setData] = useState([])
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -51,7 +48,9 @@ export default function FormDialog() {
     validationSchema : schema,
     onSubmit: values => {
       handleClose();
-      alert(JSON.stringify(values, null, 2));
+      formik.resetForm();
+      toLocalData(values);
+      loadData();
     },
   });
   const {handleBlur, handleChange, handleSubmit, errors, touched, values} = formik
@@ -81,19 +80,31 @@ export default function FormDialog() {
     },
   ];
   
-  const rows = [
-    { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-    { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-    { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-    { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-    { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-    { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-    { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-    { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-    { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-  ];
 
+  const toLocalData = (values) =>{
+    const localData = JSON.parse(localStorage.getItem("product"));
+    let id = Math.floor(Math.random()*10000);
+    let pdata = {
+      id,
+      ...values
+    }
+    if (localData === null) {
+      localStorage.setItem('product', JSON.stringify([pdata]))
+    } else {
+      localData.push(pdata)
+      localStorage.setItem('product', JSON.stringify(localData))
+    }
+  }
 
+  const loadData = () =>{
+    let localData = JSON.parse(localStorage.getItem('product'))
+    if (localData !== null) {
+      setData(localData);
+    }
+  }
+  useEffect (()=>{
+    loadData();
+  },[])
   return (
     <>
       <Button variant="outlined" onClick={handleClickOpen}>
@@ -102,7 +113,7 @@ export default function FormDialog() {
 
       <div style={{ height: 400, width: '100%' }}>
       <DataGrid
-        rows={rows}
+        rows={data}
         columns={columns}
         pageSize={5}
         rowsPerPageOptions={[5]}
