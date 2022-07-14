@@ -1,4 +1,4 @@
-import * as React from "react";
+import {React, useEffect, useState} from "react";
 import { styled, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
@@ -21,11 +21,6 @@ import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
 import { NavLink } from "react-router-dom";
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { purple, red,orange } from '@mui/material/colors';
-import { color } from "@mui/system";
-
-
-
 
 const drawerWidth = 240;
 
@@ -109,7 +104,7 @@ const cusTheme = createTheme({
 // return
 export default function Layout({ children }) {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const handleDrawerOpen = () => {
     setOpen(true);

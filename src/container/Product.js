@@ -1,4 +1,4 @@
-import * as React from 'react';
+import {React, useEffect, useState} from "react";
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
@@ -7,9 +7,12 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { DataGrid } from '@mui/x-data-grid';
+import { IconButton } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function FormDialog() {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -20,22 +23,27 @@ export default function FormDialog() {
   };
   const columns = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'firstName', headerName: 'First name', width: 130 },
-    { field: 'lastName', headerName: 'Last name', width: 130 },
+    { field: 'pname', headerName: 'Product name', width: 180 },
+    { field: 'bname', headerName: 'Brand name', width: 180 },
+    {field: 'sprice',headerName: 'Selling price',type: 'number',width: 120,},
+    {field: 'mrp',headerName: 'MRP',type: 'number',width: 120,},
+    {field: 'stock',headerName: 'stock',type: 'number',width: 70,},
+    { field: 'kwords', headerName: 'keywords', width: 250,},
     {
-      field: 'age',
-      headerName: 'Age',
-      type: 'number',
-      width: 90,
-    },
-    {
-      field: 'fullName',
-      headerName: 'Full name',
-      description: 'This column has a value getter and is not sortable.',
-      sortable: false,
-      width: 160,
-      valueGetter: (params) =>
-        `${params.row.firstName || ''} ${params.row.lastName || ''}`,
+      field: "manage",
+      headerName: "Manage",
+      width: 100,
+      renderCell: (params) => (
+        <>
+        <IconButton aria-label="delete">
+          <DeleteIcon/>
+        </IconButton>
+
+        <IconButton aria-label="edit">
+          <EditIcon />
+        </IconButton>
+        </>
+      ),
     },
   ];
   
