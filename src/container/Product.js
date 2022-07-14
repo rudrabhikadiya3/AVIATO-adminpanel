@@ -10,6 +10,13 @@ import { DataGrid } from '@mui/x-data-grid';
 import { IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import * as yup from 'yup';
+import { Form, Formik, useFormik } from 'formik';
+
+import { red } from '@mui/material/colors';
+
+const color = red[500];
+
 
 export default function FormDialog() {
   const [open, setOpen] = useState(false);
@@ -21,6 +28,33 @@ export default function FormDialog() {
   const handleClose = () => {
     setOpen(false);
   };
+
+  // form validation scema
+  let schema = yup.object().shape({
+    pname: yup.string().required('Please enter product name'),
+    bname: yup.string().required('Please enter brand name'),
+    mrp: yup.number('please enter valid mrp').required('Please enter mrp').positive("value can't in negative").integer('please enter valid mrp'),
+    sprice: yup.number('please enter valid selling price').required('Please enter selling price').positive("value can't in negative").integer('please enter valid selling price'),
+    stock: yup.number('please enter valid stock').required('Please enter stock').positive("stock can't in negative").integer('please enter valid stock'),
+    kwords: yup.string().required('Please enter keywords'),
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      pname: '',
+      bname: '',
+      sprice: '',
+      mrp: '',
+      stock: '',
+      kwords: '',
+    },
+    validationSchema : schema,
+    onSubmit: values => {
+      handleClose();
+      alert(JSON.stringify(values, null, 2));
+    },
+  });
+  const {handleBlur, handleChange, handleSubmit, errors, touched, values} = formik
   const columns = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'pname', headerName: 'Product name', width: 180 },
@@ -58,6 +92,8 @@ export default function FormDialog() {
     { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
     { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
   ];
+
+
   return (
     <>
       <Button variant="outlined" onClick={handleClickOpen}>
@@ -77,7 +113,9 @@ export default function FormDialog() {
 
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>List a product</DialogTitle>
-        <DialogContent>
+        <Formik values={formik}>
+            <Form onSubmit={handleSubmit}>
+            <DialogContent>
           <DialogContentText color={'primary'}>
             To list a product in AVIATO, Please ender below details here. Please enter details properly.
           </DialogContentText>
@@ -85,62 +123,89 @@ export default function FormDialog() {
             margin="dense"
             name="pname"
             label="Product Name"
-            type="email"
+            type="text"
             fullWidth
             variant="standard"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.pname}
           />
+          {touched.pname && errors.pname ? <span className="form-error">{errors.pname}</span> : null}
           <TextField
             margin="dense"
             name="bname"
             label="Brand Name"
-            type="email"
+            type="text"
             fullWidth
             variant="standard"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.banme}
           />
+          {touched.bname && errors.bname ? <span className="form-error">{errors.bname}</span> : null}
           <TextField
             margin="dense"
             name="mrp"
             label="MRP"
-            type="email"
+            type="text"
             fullWidth
             variant="standard"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.mrp}
           />
+          {touched.mrp && errors.mrp ? <span className="form-error">{errors.mrp}</span> : null}
          <TextField
             margin="dense"
             name='sprice'
             label="Selling Price"
-            type="email"
+            type="etxt"
             fullWidth
             variant="standard"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.sprice}
           />
+          {touched.sprice && errors.sprice ? <span className="form-error">{errors.sprice}</span> : null}
          <TextField
             margin="dense"
             name='stock'
             label="Stoke"
-            type="email"
+            type="text"
             fullWidth
             variant="standard"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.stock}
           />
-          
+          {touched.stock && errors.stock ? <span className="form-error">{errors.stock}</span> : null}
          <TextField
             margin="dense"
             name='kwords'
             label="Key Words"
-            type="email"
+            type="text"
             fullWidth
             variant="standard"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.kwords}
           />
+          {touched.kwords && errors.kwords ? <span className="form-error">{errors.kwords}</span> : null}
           <DialogContentText fontSize={11}>
            Please enter keyword that customer find easily your product <br />
                 1. Do not use coma(,) in keyword, Just keep writing. <br />
                 2. Enter only product related keywords <br />
                 3. Do not use dummy keywords
           </DialogContentText>
+
         </DialogContent>
-        <DialogActions>
+<DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleClose}>Subscribe</Button>
+          <Button type="submit">Submit</Button>
         </DialogActions>
+            </Form>
+        </Formik>
+        
       </Dialog>
     </>
   );
