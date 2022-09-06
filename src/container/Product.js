@@ -12,6 +12,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import * as yup from "yup";
 import { Form, Formik, useFormik } from "formik";
+import { useDispatch, useSelector } from "react-redux";
+import { addProductsAction, readProductsAction } from "../redux/actions/products.action";
 
 export default function FormDialog() {
   const [open, setOpen] = useState(false);
@@ -31,11 +33,11 @@ export default function FormDialog() {
     setDOpen(true);
   };
   
-
-  // form validation scema
+  const dispatch = useDispatch();
+  // form validation schema
   let schema = yup.object().shape({
     pname: yup.string().required("Please enter product name"),
-    bname: yup.string().required("Please enter brand name"),
+    brand: yup.string().required("Please enter brand name"),
     mrp: yup
       .number("please enter valid mrp")
       .required("Please enter mrp")
@@ -57,7 +59,7 @@ export default function FormDialog() {
   const formik = useFormik({
     initialValues: {
       pname: "",
-      bname: "",
+      brand: "",
       sprice: "",
       mrp: "",
       stock: "",
@@ -67,7 +69,8 @@ export default function FormDialog() {
     onSubmit: (values) => {
       handleClose();
       formik.resetForm();
-      toLocalData(values);
+      
+      toServer(values);
       loadData();
     },
   });
@@ -78,7 +81,7 @@ export default function FormDialog() {
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "pname", headerName: "Product name", width: 180 },
-    { field: "bname", headerName: "Brand name", width: 180 },
+    { field: "brand", headerName: "Brand name", width: 180 },
     {
       field: "sprice",
       headerName: "Selling price",
@@ -106,19 +109,8 @@ export default function FormDialog() {
     },
   ];
 
-  const toLocalData = (values) => {
-    const localData = JSON.parse(localStorage.getItem("product"));
-    let id = Math.floor(Math.random() * 10000);
-    let pdata = {
-      id,
-      ...values,
-    };
-    if (localData === null) {
-      localStorage.setItem("product", JSON.stringify([pdata]));
-    } else {
-      localData.push(pdata);
-      localStorage.setItem("product", JSON.stringify(localData));
-    }
+  const toServer = (values) => {
+    dispatch(addProductsAction(values))
   };
 
   const handleDelet = (params) => {
@@ -140,8 +132,12 @@ export default function FormDialog() {
   };
 
   useEffect(() => {
+    dispatch(readProductsAction())
     loadData();
   }, []);
+
+  const product = useSelector(state => state.products)
+  console.log(product);
   return (
     <>
       <Button variant="outlined" onClick={handleClickOpen}>
@@ -150,7 +146,7 @@ export default function FormDialog() {
 
       <div style={{ height: 400, width: "100%" }}>
         <DataGrid
-          rows={data}
+          rows={product.products}
           columns={columns}
           pageSize={5}
           rowsPerPageOptions={[5]}
@@ -183,7 +179,7 @@ export default function FormDialog() {
               ) : null}
               <TextField
                 margin="dense"
-                name="bname"
+                name="brand"
                 label="Brand Name"
                 type="text"
                 fullWidth
@@ -192,8 +188,8 @@ export default function FormDialog() {
                 onBlur={handleBlur}
                 value={values.banme}
               />
-              {touched.bname && errors.bname ? (
-                <span className="form-error">{errors.bname}</span>
+              {touched.brand && errors.brand ? (
+                <span className="form-error">{errors.brand}</span>
               ) : null}
               <TextField
                 margin="dense"
