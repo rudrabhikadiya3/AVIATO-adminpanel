@@ -47,16 +47,15 @@ export const editProductAction = (val) => async (dispatch) => {
   try {
     const productRef = doc(db, "products", val.id);
 
-    // Set the "capital" field of the city 'DC'
     await updateDoc(productRef, {
       sprice: val.sprice,
       kwords: val.kwords,
-      pname:  val.pname,
+      pname: val.pname,
       stock: val.stock,
       mrp: val.mrp,
       brand: val.brand,
     });
-    dispatch({ type: ActionType.EDIT_PRODUCTS, payload: val });   
+    dispatch({ type: ActionType.EDIT_PRODUCTS, payload: val });
   } catch (error) {
     console.log(error);
   }

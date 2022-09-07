@@ -18,17 +18,17 @@ export const productResucer = (state = initVal, action) => {
     case ActionType.DELETE_PRODUCTS:
       return {
         ...state,
-        products: state.products.filter(p => p.id !== action.payload),
+        products: state.products.filter((p) => p.id !== action.payload),
       };
     case ActionType.EDIT_PRODUCTS:
       return {
         ...state,
-        products: state.products.map(p => {
-            if (p.id === action.payload.id) {
-                return action.payload
-            } else {
-                return p
-            }
+        products: state.products.map((p) => {
+          if (p.id === action.payload.id) {
+            return action.payload;
+          } else {
+            return p;
+          }
         }),
       };
     default:

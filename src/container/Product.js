@@ -131,7 +131,6 @@ export default function FormDialog() {
   const editFormOpen = (params) => {
     setOpen(true);
     formik.setValues(params.row);
-    console.log(params.row);
     setEdit(true);
   };
 
