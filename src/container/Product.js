@@ -13,18 +13,25 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import * as yup from "yup";
 import { Form, Formik, useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
-import { addProductsAction, readProductsAction } from "../redux/actions/products.action";
+import {
+  addProductsAction,
+  deleteProductAction,
+  editProductAction,
+  readProductsAction,
+} from "../redux/actions/products.action";
 
 export default function FormDialog() {
   const [open, setOpen] = useState(false);
   const [dopen, setDOpen] = useState(false);
   const [data, setData] = useState([]);
-  const [alert, setAlert] = useState(0)
+  const [alert, setAlert] = useState(0);
+  const [edit, setEdit] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
+    setEdit(false);
   };
-  
+
   const handleClose = () => {
     setOpen(false);
     setDOpen(false);
@@ -32,7 +39,7 @@ export default function FormDialog() {
   const handleDClickOpen = () => {
     setDOpen(true);
   };
-  
+
   const dispatch = useDispatch();
   // form validation schema
   let schema = yup.object().shape({
@@ -69,19 +76,21 @@ export default function FormDialog() {
     onSubmit: (values) => {
       handleClose();
       formik.resetForm();
-      
-      toServer(values);
+      if (edit) {
+        dispatch(editProductAction(values));
+      } else {
+        dispatch(addProductsAction(values));
+      }
       loadData();
     },
   });
   const { handleBlur, handleChange, handleSubmit, errors, touched, values } =
     formik;
 
-    
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
+    // { field: "id", headerName: "ID", width: 70 },
     { field: "pname", headerName: "Product name", width: 180 },
-    { field: "brand", headerName: "Brand name", width: 180 },
+    { field: "brand", headerName: "Brand name", width: 150 },
     {
       field: "sprice",
       headerName: "Selling price",
@@ -97,11 +106,17 @@ export default function FormDialog() {
       width: 100,
       renderCell: (params) => (
         <>
-          <IconButton aria-label="delet" onClick={ () => {handleDClickOpen(); setAlert(params.id)} } >
-            <DeleteIcon/>
+          <IconButton
+            aria-label="delet"
+            onClick={() => {
+              handleDClickOpen();
+              setAlert(params.id);
+            }}
+          >
+            <DeleteIcon />
           </IconButton>
 
-          <IconButton aria-label="edit">
+          <IconButton aria-label="edit" onClick={() => editFormOpen(params)}>
             <EditIcon />
           </IconButton>
         </>
@@ -109,20 +124,16 @@ export default function FormDialog() {
     },
   ];
 
-  const toServer = (values) => {
-    dispatch(addProductsAction(values))
+  const handleDelet = () => {
+    dispatch(deleteProductAction(alert));
+    setDOpen(false);
   };
-
-  const handleDelet = (params) => {
-    let localData = JSON.parse(localStorage.getItem('product'))
-    let deletData = localData.filter((d) =>(d.id !== alert))
-
-    setData(localData);
-
-    localStorage.setItem('product' , JSON.stringify(deletData));
-    loadData();
-    handleClose();
-  }
+  const editFormOpen = (params) => {
+    setOpen(true);
+    formik.setValues(params.row);
+    console.log(params.row);
+    setEdit(true);
+  };
 
   const loadData = () => {
     let localData = JSON.parse(localStorage.getItem("product"));
@@ -132,37 +143,44 @@ export default function FormDialog() {
   };
 
   useEffect(() => {
-    dispatch(readProductsAction())
+    dispatch(readProductsAction());
     loadData();
   }, []);
 
-  const product = useSelector(state => state.products)
-  console.log(product);
+  const product = useSelector((state) => state.products);
   return (
     <>
       <Button variant="outlined" onClick={handleClickOpen}>
         Add Product
       </Button>
 
-      <div style={{ height: 400, width: "100%" }}>
+      <div style={{ height: 1000, width: "100%" }}>
         <DataGrid
+          Value="Center"
           rows={product.products}
           columns={columns}
-          pageSize={5}
-          rowsPerPageOptions={[5]}
+          pageSize={10}
+          rowsPerPageOptions={[10]}
           checkboxSelection
         />
       </div>
       {/* ----- form dialogue ----- */}
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>List a product</DialogTitle>
+        {edit ? (
+          <DialogTitle>Edit listed products</DialogTitle>
+        ) : (
+          <DialogTitle>List a new product</DialogTitle>
+        )}
+
         <Formik values={formik}>
           <Form onSubmit={handleSubmit}>
             <DialogContent>
-              <DialogContentText color={"primary"}>
-                To list a product in AVIATO, Please ender below details here.
-                Please enter details properly.
-              </DialogContentText>
+              {edit ? null : (
+                <DialogContentText color={"primary"}>
+                  To list a product in AVIATO, Please ender below details here.
+                  Please enter details properly.
+                </DialogContentText>
+              )}
               <TextField
                 margin="dense"
                 name="pname"
@@ -186,7 +204,7 @@ export default function FormDialog() {
                 variant="standard"
                 onChange={handleChange}
                 onBlur={handleBlur}
-                value={values.banme}
+                value={values.brand}
               />
               {touched.brand && errors.brand ? (
                 <span className="form-error">{errors.brand}</span>
@@ -257,7 +275,11 @@ export default function FormDialog() {
             </DialogContent>
             <DialogActions>
               <Button onClick={handleClose}>Cancel</Button>
-              <Button type="submit">Submit</Button>
+              {edit ? (
+                <Button type="submit">change</Button>
+              ) : (
+                <Button type="submit">submit</Button>
+              )}
             </DialogActions>
           </Form>
         </Formik>
@@ -275,12 +297,12 @@ export default function FormDialog() {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-          This product will also be delist from AVIATO after deletion
+            This product will also be delist from AVIATO after deletion
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>NO</Button>
-          <Button onClick={()=>handleDelet()} autoFocus>
+          <Button onClick={() => handleDelet()} autoFocus>
             YES
           </Button>
         </DialogActions>
