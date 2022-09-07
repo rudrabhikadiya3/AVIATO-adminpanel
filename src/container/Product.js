@@ -7,7 +7,13 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { DataGrid } from "@mui/x-data-grid";
-import { IconButton } from "@mui/material";
+import {
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import * as yup from "yup";
@@ -23,7 +29,6 @@ import {
 export default function FormDialog() {
   const [open, setOpen] = useState(false);
   const [dopen, setDOpen] = useState(false);
-  const [data, setData] = useState([]);
   const [alert, setAlert] = useState(0);
   const [edit, setEdit] = useState(false);
 
@@ -35,6 +40,7 @@ export default function FormDialog() {
   const handleClose = () => {
     setOpen(false);
     setDOpen(false);
+    formik.resetForm()
   };
   const handleDClickOpen = () => {
     setDOpen(true);
@@ -61,6 +67,7 @@ export default function FormDialog() {
       .positive("stock can't in negative")
       .integer("please enter valid stock"),
     kwords: yup.string().required("Please enter keywords"),
+    catagory: yup.string().required("Please select catagory"),
   });
 
   const formik = useFormik({
@@ -71,6 +78,7 @@ export default function FormDialog() {
       mrp: "",
       stock: "",
       kwords: "",
+      catagory: ""
     },
     validationSchema: schema,
     onSubmit: (values) => {
@@ -81,16 +89,16 @@ export default function FormDialog() {
       } else {
         dispatch(addProductsAction(values));
       }
-      loadData();
     },
   });
   const { handleBlur, handleChange, handleSubmit, errors, touched, values } =
     formik;
 
   const columns = [
-    // { field: "id", headerName: "ID", width: 70 },
+    
     { field: "pname", headerName: "Product name", width: 180 },
     { field: "brand", headerName: "Brand name", width: 150 },
+    { field: "catagory", headerName: "Catagoty", width: 130 },
     {
       field: "sprice",
       headerName: "Selling price",
@@ -130,26 +138,19 @@ export default function FormDialog() {
   };
   const editFormOpen = (params) => {
     setOpen(true);
-    formik.setValues(params.row);
+   formik.setValues(params.row);
     setEdit(true);
   };
 
-  const loadData = () => {
-    let localData = JSON.parse(localStorage.getItem("product"));
-    if (localData !== null) {
-      setData(localData);
-    }
-  };
 
   useEffect(() => {
     dispatch(readProductsAction());
-    loadData();
   }, []);
 
   const product = useSelector((state) => state.products);
   return (
     <>
-      <Button variant="outlined" onClick={handleClickOpen}>
+      <Button variant="contained" onClick={handleClickOpen} >
         Add Product
       </Button>
 
@@ -207,6 +208,28 @@ export default function FormDialog() {
               />
               {touched.brand && errors.brand ? (
                 <span className="form-error">{errors.brand}</span>
+              ) : null}
+
+              <FormControl variant="standard" fullWidth margin="dense">
+                <InputLabel id="demo-simple-select-standard-label">
+                  Catagory
+                </InputLabel>
+                <Select
+                  labelId="demo-simple-select-standard-label"
+                  id="demo-simple-select-standard"
+                  onChange={handleChange}
+                  label="Catagory"
+                  fullWidth
+                  name="catagory"
+                  value={values.catagory}
+                >
+                  <MenuItem value={"fashion"} defaultValue>Fashion</MenuItem>
+                  <MenuItem value={"electronics"}>Electronics</MenuItem>
+                  <MenuItem value={"grocery"}>Grocery</MenuItem>
+                </Select>
+              </FormControl>
+              {touched.catagory && errors.catagory ? (
+                <span className="form-error">{errors.catagory}</span>
               ) : null}
               <TextField
                 margin="dense"
