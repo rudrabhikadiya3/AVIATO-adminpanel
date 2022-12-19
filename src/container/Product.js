@@ -8,6 +8,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { DataGrid } from "@mui/x-data-grid";
 import {
+  ButtonGroup,
   FormControl,
   IconButton,
   InputLabel,
@@ -31,6 +32,8 @@ export default function FormDialog() {
   const [dopen, setDOpen] = useState(false);
   const [alert, setAlert] = useState(0);
   const [edit, setEdit] = useState(false);
+  const [filterData, setFilterData] = useState([]);
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -40,7 +43,7 @@ export default function FormDialog() {
   const handleClose = () => {
     setOpen(false);
     setDOpen(false);
-    formik.resetForm()
+    formik.resetForm();
   };
   const handleDClickOpen = () => {
     setDOpen(true);
@@ -78,10 +81,11 @@ export default function FormDialog() {
       mrp: "",
       stock: "",
       kwords: "",
-      catagory: ""
+      catagory: "",
     },
     validationSchema: schema,
     onSubmit: (values) => {
+      console.log(values);
       handleClose();
       formik.resetForm();
       if (edit) {
@@ -95,7 +99,6 @@ export default function FormDialog() {
     formik;
 
   const columns = [
-    
     { field: "pname", headerName: "Product name", width: 180 },
     { field: "brand", headerName: "Brand name", width: 150 },
     { field: "catagory", headerName: "Catagoty", width: 130 },
@@ -138,18 +141,35 @@ export default function FormDialog() {
   };
   const editFormOpen = (params) => {
     setOpen(true);
-   formik.setValues(params.row);
+    formik.setValues(params.row);
     setEdit(true);
   };
+  const products = useSelector((state) => state.products.products);
 
-
+  const handleCatagory = (cat) =>{
+    const catFilterData = products.filter(ap => ap.catagory === cat)
+    setFilterData(catFilterData)
+    console.log(catFilterData);
+  }
+  const showData = filterData.length === 0 ? products : filterData
   useEffect(() => {
     dispatch(readProductsAction());
-  }, []);
+  },[]);
 
-  const product = useSelector((state) => state.products);
   return (
     <>
+      <ButtonGroup margin="dense"
+        variant="contained"
+        aria-label="outlined primary button group"
+        color="info"
+        orientation="horizontal"
+      >
+        <Button onClick={()=>handleCatagory('all')}>All</Button>
+        <Button onClick={()=>handleCatagory('fashion')}>Fashion</Button>
+        <Button onClick={()=>handleCatagory('electronics')}>Electronics</Button>
+        <Button onClick={()=>handleCatagory('grocery')}>Grocery</Button>
+      </ButtonGroup>
+      <br />
       <Button variant="contained" onClick={handleClickOpen} >
         Add Product
       </Button>
@@ -157,7 +177,7 @@ export default function FormDialog() {
       <div style={{ height: 1000, width: "100%" }}>
         <DataGrid
           Value="Center"
-          rows={product.products}
+          rows={showData}
           columns={columns}
           pageSize={10}
           rowsPerPageOptions={[10]}
@@ -223,7 +243,9 @@ export default function FormDialog() {
                   name="catagory"
                   value={values.catagory}
                 >
-                  <MenuItem value={"fashion"} defaultValue>Fashion</MenuItem>
+                  <MenuItem value={"fashion"}>
+                    Fashion
+                  </MenuItem>
                   <MenuItem value={"electronics"}>Electronics</MenuItem>
                   <MenuItem value={"grocery"}>Grocery</MenuItem>
                 </Select>
